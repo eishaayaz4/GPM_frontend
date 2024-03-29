@@ -26,18 +26,18 @@ const App = (props) => {
    return (
       <NavigationContainer >
          <Stack.Navigator>
-            <Stack.Screen name="Splash" component={Splash} />
-            <Stack.Screen name="Login" component={Login} />
-            <Stack.Screen name="dashboard" component={dashboard} />
-            <Stack.Screen name="group_photo" component={group_photo} />
-            <Stack.Screen name="background" component={background} />
-            <Stack.Screen name="signUp" component={signUp} />
-            <Stack.Screen name="background_processed" component={background_processed} />
-            <Stack.Screen name="add_template" component={add_template} />
-            <Stack.Screen name="view_template" component={view_template} />
-            <Stack.Screen name="celebrity" component={celebrity} />
-            <Stack.Screen name="remove_from_group" component={remove_from_group} />
-            <Stack.Screen name="extract_photo" component={extract_photo} />
+            <Stack.Screen name="Splash" component={Splash} options={{headerShown:false}} />
+            <Stack.Screen name="Login" component={Login} options={{ headerTitle: "Login" }} />
+            <Stack.Screen name="dashboard" component={dashboard} options={{headerTitle:"Dashboard"}}/>
+            <Stack.Screen name="group_photo" component={group_photo} options={{ headerTitle: "Group Photo" }} />
+            <Stack.Screen name="background" component={background} options={{ headerTitle: "Background" }} />
+            <Stack.Screen name="signUp" component={signUp} options={{ headerTitle: "SignUp" }} />
+            <Stack.Screen name="background_processed" component={background_processed} options={{ headerTitle: "Background" }} />
+            <Stack.Screen name="add_template" component={add_template} options={{ headerTitle: "Add Template" }} />
+            <Stack.Screen name="view_template" component={view_template} options={{ headerTitle: "View Template" }} />
+            <Stack.Screen name="celebrity" component={celebrity} options={{ headerTitle: "Celebrity" }} />
+            <Stack.Screen name="remove_from_group" component={remove_from_group} options={{ headerTitle: "Remove From Group" }} />
+            <Stack.Screen name="extract_photo" component={extract_photo} options={{ headerTitle: "Extract Person" }} />
 
          </Stack.Navigator>
       </NavigationContainer>

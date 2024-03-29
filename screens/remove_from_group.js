@@ -57,7 +57,7 @@ export default function App(props) {
         };
 
         launchImageLibrary(options, (response) => {
-            console.log('Response = ', response);
+
 
             if (response.didCancel) {
                 alert('User cancelled camera picker');
@@ -74,14 +74,14 @@ export default function App(props) {
             }
 
             if (response.assets && response.assets.length > 0) {
-                console.log('base64 -> ', response.assets[0].base64);
+
 
                 setImage({
                     'uri': response.assets[0]?.uri || '',
                     'name': response.assets[0]?.fileName || '',
                     'type': response.assets[0]?.type || ''
                 });
-                
+
                 setFilePath(response.assets[0] || {});
             } else {
                 alert('No image selected');
