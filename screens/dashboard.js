@@ -1,11 +1,12 @@
 import React, { useState } from 'react'
-import { Text, View, StyleSheet, Pressable, TouchableOpacity, TextInput, ImageBackground, Image } from 'react-native'
+import { Text, View, StyleSheet, Pressable, ImageBackground, Image } from 'react-native'
 import { useNavigation } from '@react-navigation/native';
 
 
 const App = (props) => {
+
     const navigation = useNavigation()
-    return (
+        return (
         <View>
             <ImageBackground
                 source={require('../assets/Imagebg.png')}
@@ -43,14 +44,14 @@ const App = (props) => {
                         </Pressable>
                     </View>
                     <View style={{ flexDirection: 'row' }}>
-                        <Pressable onPress={() => navigation.navigate('group_photo')}  style={style.box}>
+                        <Pressable onPress={() => navigation.navigate('group_photo')} style={style.box}>
                             <Image
                                 source={require('../assets/AddGroup.png')}
                                 style={style.image}
                             />
                             <Text style={style.label}>ADD TO GROUP</Text>
                         </Pressable>
-                        <Pressable style={style.box} onPress={()=>{navigation.navigate('remove_from_group')}}>
+                        <Pressable style={style.box} onPress={() => { navigation.navigate('remove_from_group') }}>
 
                             <Image
                                 source={require('../assets/removeUSer.png')}
@@ -75,7 +76,18 @@ const App = (props) => {
                     </View>
                 </View>
             </View>
+            <View style={style.bottomBarContainer}>
+                <View style={style.bottomBar}>
+                    <Pressable onPress={() => navigation.navigate('dashboard')}>
+                        <Image source={require('../assets/home.png')} style={style.icon} />
+                    </Pressable>
+                    <Pressable onPress={() => navigation.navigate('history')}>
+                        <Image source={require('../assets/history.png')} style={style.icon} />
+                    </Pressable>
 
+                    <Image source={require('../assets/account.png')} style={style.icon} />
+                </View>
+            </View>
         </View >
     )
 }
@@ -127,6 +139,25 @@ const style = StyleSheet.create({
         textAlign: 'center',
         fontFamily: 'Poppins Regular'
     },
+    bottomBarContainer: {
+        marginTop: 35,
+       
+    },
+    bottomBar: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        backgroundColor: '#FFFFFF',
+        height: 60,
+        borderTopWidth: 1,
+        borderTopColor: '#EAEAEA',
+        alignItems:'center'
+    },
+    icon: {
+        width: 30,
+        height: 30,
+        resizeMode: 'contain',
+    },
+
 }
 )
 export default App;

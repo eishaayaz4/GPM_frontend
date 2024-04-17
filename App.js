@@ -15,7 +15,8 @@ import add_template from './screens/add_template';
 import celebrity from './screens/celebrity';
 import remove_from_group from './screens/remove_from_group';
 import extract_photo from './screens/extract_photo';
-
+import edit_template from './screens/edit_template';
+import history from './screens/history';
 
 
 const Stack = createNativeStackNavigator();
@@ -38,7 +39,10 @@ const App = (props) => {
             <Stack.Screen name="celebrity" component={celebrity} options={{ headerTitle: "Celebrity" }} />
             <Stack.Screen name="remove_from_group" component={remove_from_group} options={{ headerTitle: "Remove From Group" }} />
             <Stack.Screen name="extract_photo" component={extract_photo} options={{ headerTitle: "Extract Person" }} />
+            <Stack.Screen name="edit_template" component={edit_template} options={{ headerTitle: "Edit Template" }} />
+            <Stack.Screen name="history" component={history} options={{ headerTitle: "History" }} />
 
+            
          </Stack.Navigator>
       </NavigationContainer>
    );

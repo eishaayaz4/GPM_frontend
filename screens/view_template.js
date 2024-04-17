@@ -12,54 +12,52 @@ export default function App(props) {
     const [celebrities, setCelebrities] = useState([]);
     const [backgroundIndex, setBackgroundIndex] = useState(0);
     const [celebrityIndex, setCelebrityIndex] = useState(0);
-    const [delId, setDelId] = useState(0)
     const [result, setResult] = useState([])
     const [searchIndex, setSearchIndex] = useState(0);
     const [isSearching, setIsSearching] = useState(false);
 
-
     useEffect(() => {
-        getAllBackgrounds();
+        GetAllBackgrounds();
         GetAllCelebrities();
     }, [])
 
-    const getAllBackgrounds = async () => {
+    const GetAllBackgrounds = async () => {
         try {
-            const response = await fetch(url+'GetAllBackgrounds');
+            const response = await fetch(`${url}GetAllBackgrounds`);
             if (response.ok) {
                 console.log(response)
                 const data = await response.json();
-                console.log(data);
                 setBackgrounds(data);
+                console.log("bg", data)
             } else {
                 throw new Error('Failed to fetch backgrounds.');
             }
         } catch (error) {
-            console.error('Error occurred during API request:', error)
+            console.log(error)
         }
 
     }
 
     const GetAllCelebrities = async () => {
         try {
-            const response = await fetch('http://127.0.0.1:5000/GetAllCelebrities');
+            const response = await fetch(`${url}GetAllCelebrities`);
             if (response.ok) {
                 console.log(response)
                 const data = await response.json();
-                console.log(data);
                 setCelebrities(data);
+
             } else {
                 throw new Error('Failed to fetch celeberities.');
             }
         } catch (error) {
-            console.error('Error occurred during API request:', error)
+            console.log(error)
         }
 
     }
 
     const GetSearchItems = async (text) => {
         try {
-            const response = await fetch(url+`GetTemplateBySearch/${text}`, {
+            const response = await fetch(url + `GetTemplateBySearch/${text}`, {
                 method: 'POST',
                 headers: {
                     Accept: 'application/json',
@@ -110,12 +108,24 @@ export default function App(props) {
                     />
                 </Pressable>
             }
+
+            {showIcon === item &&
+                <Pressable onPress={() =>
+                    navigation.navigate('editTemplate', { id: item.id, name: item.name, category: item.category, type: item.type, image: item.image })
+                }
+                    style={{ backgroundColor: '#fcfcfc', opacity: 0.8, position: 'absolute', borderRadius: 20, width: 40, height: 40, marginLeft: 7, marginRight: 4 }}>
+                    <Image
+                        source={require('../assets/edit.png')}
+                        style={{ height: 20, width: 20, tintColor: 'red', }}
+                    />
+                </Pressable>
+            }
         </Pressable>
     );
 
     const deleteTemplate = async (id) => {
         try {
-            const response = await fetch(url+`DeleteTemplate/${id}`, {
+            const response = await fetch(url + `DeleteTemplate/${id}`, {
                 method: 'DELETE',
                 headers: {
                     Accept: 'application/json',
@@ -135,7 +145,9 @@ export default function App(props) {
         }
     }
 
+
     const renderCelebrityItem = ({ item, index }) => (
+
         <Pressable onLongPress={() => { setShowIcon(item) }} style={style.box}>
             <Image source={{ uri: `data:image/jpeg;base64,${item.image}` }} style={style.image} />
             {showIcon === item &&
@@ -155,14 +167,34 @@ export default function App(props) {
                             },
                         ]
                     )
-                }} style={{ backgroundColor: '#fcfcfc', opacity: 0.8, position: 'absolute', borderRadius: 20, alignItems: 'center', justifyContent: 'center', width: 40, height: 40, }}>
+                }} style={{ backgroundColor: '#fcfcfc', opacity: 0.8, position: 'absolute', borderRadius: 20, justifyContent: 'center', width: 40, height: 40, marginLeft: 20, marginRight: 10 }}>
                     <Image
                         source={require('../assets/remove.png')}
                         style={{ height: 20, width: 20, tintColor: 'red', }}
                     />
                 </Pressable>
+
+
+            }
+
+            {showIcon === item &&
+                <Pressable onPress={() =>
+                    navigation.navigate('edit_template', { id: item.id, name: item.name, category: item.category, type: item.type, image: item.image })
+                }
+                    style={{ backgroundColor: '#fcfcfc', opacity: 0.8, position: 'absolute', borderRadius: 20, width: 40, height: 40, marginLeft: 7, marginRight: 20, justifyContent: 'center' }}>
+                    <Image
+                        source={require('../assets/edit.png')}
+                        style={{ height: 20, width: 20, tintColor: 'red', }}
+                    />
+                </Pressable>
             }
         </Pressable>
+
+
+
+
+
+
     );
 
 
@@ -264,7 +296,7 @@ export default function App(props) {
                         </Text>
                         <Image
                             source={require('../assets/upload.png')}
-                            style={{ height: 25, width: 25, resizeMode: 'contain', marginLeft: 10 }}
+                            style={{ height: 25, width: 25, resizeMode: 'contain', marginLeft: 30 }}
                         />
                     </Pressable>
                 </View>
@@ -286,9 +318,9 @@ const style = StyleSheet.create({
     },
     upload: {
         backgroundColor: '#FCFCFC',
-        paddingHorizontal: 70,
+        paddingHorizontal: 50,
         paddingVertical: 13,
-        margin: 40,
+        margin: 35,
         borderRadius: 15,
         marginTop: 50,
         elevation: 3,
