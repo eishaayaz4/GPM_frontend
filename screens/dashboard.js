@@ -140,7 +140,7 @@ const style = StyleSheet.create({
         fontFamily: 'Poppins Regular'
     },
     bottomBarContainer: {
-        marginTop: 35,
+        marginTop: 10,
        
     },
     bottomBar: {

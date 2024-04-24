@@ -1,17 +1,19 @@
 import React, { useState } from 'react'
-import { Text, View, StyleSheet, Pressable, TextInput, ImageBackground, Image } from 'react-native'
+import { Text, View, StyleSheet, Pressable, TextInput, ImageBackground, PermissionsAndroid, Image } from 'react-native'
 import {
     launchCamera,
     launchImageLibrary
 } from 'react-native-image-picker';
 
+import { useNavigation } from '@react-navigation/native';
+
 export default function App() {
+
+    const navigation = useNavigation();
 
     const [individualImage, setIndividualImage] = useState('')
     const [groupImage, setGroupImage] = useState('')
-    const [filePath, setFilePath] = useState()
-
-
+    const [filePath, setFilePath] = useState('')
 
     const requestExternalWritePermission = async () => {
         if (Platform.OS === 'android') {
@@ -46,10 +48,7 @@ export default function App() {
         requestExternalWritePermission()
         let options = {
             mediaType: type,
-            maxWidth: 300,
-            maxHeight: 550,
             quality: 1,
-            includeBase64: true
         };
 
         launchImageLibrary(options, (response) => {
@@ -89,6 +88,12 @@ export default function App() {
         });
     };
 
+
+    const handleExtractButtonClick = () => {
+        // Navigate to the next screen and pass the 'image' state as a parameter
+        navigation.navigate('add_to_group', { selectedGroup: groupImage, selectedIndividual: individualImage });
+    };
+
     return (
         <View>
             <ImageBackground
@@ -112,30 +117,49 @@ export default function App() {
                     </Pressable>
 
                     <Pressable onPress={() => { chooseFile('group') }} style={[style.box, {}]}>
-                        {!groupImage ? (
-                            <View>
-<Image
-                            source={require('../assets/upload.png')}
-                            style={style.image}
-                                />
-                                <Text style={style.label}>GROUP PICTURE</Text>
-                            </View>
-                        )    
-                            : (
-                                <Image
-                                    source={{uri:groupImage.uri}}
-                                    style={style.box}
-                                />    
-                    )}
-                        
+
+                        <View>
+                            <Image
+                                source={require('../assets/upload.png')}
+                                style={style.image}
+                            />
+                            <Text style={style.label}>GROUP PICTURE</Text>
+                        </View>
+
+
+
                     </Pressable>
                 </View>
+                {groupImage && individualImage &&
+                    <View style={{ flex: 1, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginTop: 80, }}>
 
+                        <Pressable onPress={handleExtractButtonClick} style={{ backgroundColor: '#FFF', padding: 15, margin: 20, marginHorizontal: 300, borderRadius: 150, marginRight: 10, marginTop: 112 }} >
+                            <Image source={require('../assets/right.png')} style={{ height: 30, width: 30 }}></Image>
+                        </Pressable>
+                    </View>
+                }
+                {groupImage && individualImage &&
 
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginTop: 80, }}>
+
+                        <View style={style.SelectBox}>
+
+                            <Image
+                                source={{ uri: individualImage.uri }}
+                                style={style.SelectImage}
+                            />
+                        </View>
+
+                        <View style={style.SelectBox}>
+
+                            <Image
+                                source={{ uri: groupImage.uri }}
+                                style={style.SelectImage}
+                            />
+                        </View>
+                    </View>
+                }
             </View>
-
-
-
         </View>
 
     )
@@ -143,7 +167,7 @@ export default function App() {
 const style = StyleSheet.create({
     container: {
         paddingHorizontal: 5,
-        paddingVertical: 30,
+        paddingVertical: 20,
     },
     background: {
         height: 900,
@@ -162,6 +186,12 @@ const style = StyleSheet.create({
         marginBottom: 10,
 
     },
+    SelectImage: {
+        width: 100,
+        height: 100,
+        borderRadius: 10,
+
+    },
     uploadBox: {
         backgroundColor: '#FCFCFC',
         borderRadius: 15,
@@ -171,6 +201,17 @@ const style = StyleSheet.create({
         width: 180,
         height: 210,
 
+    },
+    SelectBox: {
+        backgroundColor: '#FCFCFC',
+        borderRadius: 15,
+        marginHorizontal: 10,
+        marginVertical: 20,
+        elevation: 3,
+        width: 110,
+        height: 110,
+        alignItems: 'center',
+        justifyContent: 'center'
     },
     box: {
         backgroundColor: '#FCFCFC',

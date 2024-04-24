@@ -17,6 +17,9 @@ import remove_from_group from './screens/remove_from_group';
 import extract_photo from './screens/extract_photo';
 import edit_template from './screens/edit_template';
 import history from './screens/history';
+import resultant_removeFromGroup from './screens/resultant_removeFromGroup';
+import add_to_group from './screens/add_to_group';
+import resultant_addToGroup from './screens/resutant_addToGroup';
 
 
 const Stack = createNativeStackNavigator();
@@ -41,6 +44,9 @@ const App = (props) => {
             <Stack.Screen name="extract_photo" component={extract_photo} options={{ headerTitle: "Extract Person" }} />
             <Stack.Screen name="edit_template" component={edit_template} options={{ headerTitle: "Edit Template" }} />
             <Stack.Screen name="history" component={history} options={{ headerTitle: "History" }} />
+            <Stack.Screen name="resultant_removeFromGroup" component={resultant_removeFromGroup} options={{ headerTitle: "Remove From Group" }} />
+            <Stack.Screen name="add_to_group" component={add_to_group} options={{ headerTitle: "Add To Group" }} />
+            <Stack.Screen name="resultant_addToGroup" component={resultant_addToGroup} options={{ headerTitle: "Add To Group" }} />
 
             
          </Stack.Navigator>

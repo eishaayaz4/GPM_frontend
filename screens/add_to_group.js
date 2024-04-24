@@ -6,7 +6,7 @@ import { useNavigation } from '@react-navigation/native';
 const App = (props) => {
 
     const navigation = useNavigation();
-    const { selected } = props.route.params;
+    const { selectedGroup, selectedIndividual } = props.route.params;
 
     const [coordinates, setCoordinates] = useState({ x: 0, y: 0 });
     const [imageWidth, setImageWidth] = useState(0);
@@ -14,8 +14,8 @@ const App = (props) => {
     const [processedImageUrl, setProcessedImageUrl] = useState();
 
     useEffect(() => {
-        if (selected) {
-            Image.getSize(selected.uri, (width, height) => {
+        if (selectedIndividual && selectedGroup) {
+            Image.getSize(selectedGroup.uri, (width, height) => {
                 const screenWidth = Dimensions.get('window').width;
                 const aspectRatio = width / height;
                 const calculatedHeight = screenWidth / aspectRatio;
@@ -26,7 +26,7 @@ const App = (props) => {
                 console.log('Error getting image dimensions:', error);
             });
         }
-    }, [selected]);
+    }, [selectedGroup]);
 
 
     const handlePress = (evt) => {
@@ -35,31 +35,38 @@ const App = (props) => {
         console.log('Coordinates:', locationX, locationY);
     };
 
-    const handleInsert = async () => {
+    const handleMerge = async () => {
         try {
+
+            console.log("x,y", coordinates.x, coordinates.y)
             const formData = new FormData();
-            formData.append('image_path', {
-                uri: selected.uri,
-                name: selected.name,
-                type: selected.type,
+            formData.append('groupImage', {
+                uri: selectedGroup.uri,
+                name: selectedGroup.name,
+                type: selectedGroup.type,
+            });
+            formData.append('individualImage', {
+                uri: selectedIndividual.uri,
+                name: selectedIndividual.name,
+                type: selectedIndividual.type,
             });
             formData.append('x', coordinates.x);
             formData.append('y', coordinates.y);
 
-            const response = await fetch(`${url}RemoveFromGroupPhoto`, {
+            const response = await fetch(`${url}addToGroup`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
                 body: formData,
             });
-            
+
             if (response.ok) {
+                console.log(response)
                 const result = await response.json();
-              
-                const { result_image_base64 } = result;
-                setProcessedImageUrl(`data:image/png;base64,${result_image_base64}`)
-                navigation.navigate('resultant_removeFromGroup', { selected: processedImageUrl })
+                console.log(result);
+
+                navigation.navigate('resultant_removeFromGroup', { selected: `data:image/png;base64,${result.result_image_base64}` })
             } else {
                 console.error('Error:', response.statusText);
             }
@@ -80,14 +87,14 @@ const App = (props) => {
                 <TouchableOpacity onPress={handlePress} style={[styles.imageContainer, { height: imageHeight }]}>
                     <Image
                         style={{ width: imageWidth, height: imageHeight }}
-                        source={{ uri: selected.uri }}
+                        source={{ uri: selectedGroup.uri }}
                         onError={(error) => console.log('Image error:', error)}
                     />
                     <View style={[styles.dot, { left: coordinates.x - 5, top: coordinates.y - 5 }]} />
                 </TouchableOpacity>
-                <Pressable onPress={handleInsert}
+                <Pressable onPress={handleMerge}
                     style={{ alignItems: 'center', backgroundColor: '#AC326A', padding: 15, width: '40%', marginVertical: 30, borderRadius: 30 }}>
-                    <Text style={{ color: 'white', fontWeight: '800' }}>Extract</Text>
+                    <Text style={{ color: 'white', fontWeight: '800' }}>Merge</Text>
                 </Pressable>
             </ScrollView>
         </View>
@@ -98,7 +105,7 @@ export default App;
 
 const styles = StyleSheet.create({
     container: {
-        
+
         alignItems: 'center',
     },
     background: {
@@ -117,7 +124,7 @@ const styles = StyleSheet.create({
     dot: {
         width: 10,
         height: 10,
-        backgroundColor: 'yellow',
+        backgroundColor: 'black',
         elevation: 5,
         borderRadius: 10,
         position: 'absolute',
