@@ -20,6 +20,7 @@ import history from './screens/history';
 import resultant_removeFromGroup from './screens/resultant_removeFromGroup';
 import add_to_group from './screens/add_to_group';
 import resultant_addToGroup from './screens/resutant_addToGroup';
+import remove_from_group_test from './screens/remove_from_group_test';
 
 
 const Stack = createNativeStackNavigator();
@@ -30,9 +31,9 @@ const App = (props) => {
    return (
       <NavigationContainer >
          <Stack.Navigator>
-            <Stack.Screen name="Splash" component={Splash} options={{headerShown:false}} />
+            <Stack.Screen name="Splash" component={Splash} options={{ headerShown: false }} />
             <Stack.Screen name="Login" component={Login} options={{ headerTitle: "Login" }} />
-            <Stack.Screen name="dashboard" component={dashboard} options={{headerTitle:"Dashboard"}}/>
+            <Stack.Screen name="dashboard" component={dashboard} options={{ headerTitle: "Dashboard" }} />
             <Stack.Screen name="group_photo" component={group_photo} options={{ headerTitle: "Group Photo" }} />
             <Stack.Screen name="background" component={background} options={{ headerTitle: "Background" }} />
             <Stack.Screen name="signUp" component={signUp} options={{ headerTitle: "SignUp" }} />
@@ -47,8 +48,8 @@ const App = (props) => {
             <Stack.Screen name="resultant_removeFromGroup" component={resultant_removeFromGroup} options={{ headerTitle: "Remove From Group" }} />
             <Stack.Screen name="add_to_group" component={add_to_group} options={{ headerTitle: "Add To Group" }} />
             <Stack.Screen name="resultant_addToGroup" component={resultant_addToGroup} options={{ headerTitle: "Add To Group" }} />
+            <Stack.Screen name="remove_from_group_test" component={remove_from_group_test} options={{ headerTitle: "Remove from group" }} />
 
-            
          </Stack.Navigator>
       </NavigationContainer>
    );

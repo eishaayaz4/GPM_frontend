@@ -59,7 +59,7 @@ const App = (props) => {
               
                 const { result_image_base64 } = result;
                 setProcessedImageUrl(`data:image/png;base64,${result_image_base64}`)
-                navigation.navigate('resultant_removeFromGroup', { selected: processedImageUrl })
+                navigation.navigate('remove_from_group_test', { selected: processedImageUrl })
             } else {
                 console.error('Error:', response.statusText);
             }

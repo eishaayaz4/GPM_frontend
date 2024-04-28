@@ -91,7 +91,7 @@ export default function App(props) {
 
     const handleExtractButtonClick = () => {
         // Navigate to the next screen and pass the 'image' state as a parameter
-        navigation.navigate('extract_photo', { selected: image });
+        navigation.navigate('remove_from_group_test', { selected: image });
     };
 
     return (
