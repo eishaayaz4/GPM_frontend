@@ -4,48 +4,46 @@ import { useNavigation } from '@react-navigation/native';
 import url from '../api_url';
 const App = (props) => {
     const [loading, setLoading] = useState(false)
-    const { selected, user_id } = props.route.params;
+    let { selectedCelebrity, image, user_id, height, width, id } = props.route.params;
     const navigation = useNavigation()
     const [point, setPoint] = useState({ x: null, y: null });
     const [imageHeight, setImageHeight] = useState(null);
-    const [actualImageSize, setActualImageSize] = useState({ actualWidth: null, actualHeight: null })
+    const [actualImageSize, setActualImageSize] = useState({ actualWidth: width, actualHeight: height })
 
     useEffect(() => {
-        console.log("Selected Image ======", selected)
+        console.log("Selected celebrity size ======", height, width)
+        console.log("Selected Image ====== ", image.uri)
+        console.log("Selected celeb ====== ", selectedCelebrity)
+        console.log("celeb", id)
 
-        Image.getSize(selected.uri,
-            (width, height) => {
-                setActualImageSize({ actualWidth: width, actualHeight: height })
-                height = ((Dimensions.get('window').width) / (width)) * height
-                setImageHeight(height);
-            },
-            (error) => {
-                console.error('Error getting image size:', error);
-            }
-        );
     }, []);
+
+
 
     const handleImagePress = (event) => {
         const { locationX, locationY } = event.nativeEvent;
         console.log("Marked Points ======", locationX, locationY)
         setPoint({ x: locationX, y: locationY });
     };
-    const handleRemove = () => {
-        setLoading(true)
+    const handleMerge = () => {
+        setLoading(true);
+        console.log("Selected points ======", actualImageSize.actualHeight, actualImageSize.actualWidth, imageHeight, Dimensions.get('window').width, point.x, point.y)
+
         const formData = new FormData();
+        formData.append('id', id);
         formData.append('image', {
-            uri: selected.uri,
-            name: selected.name,
-            type: selected.type,
+            uri: image.uri,
+            name: image.name,
+            type: image.type,
         });
         formData.append('x', point.x);
         formData.append('y', point.y);
         formData.append('imageWidth', Dimensions.get('window').width);
-        formData.append('imageHeight', imageHeight);
+        formData.append('imageHeight', Dimensions.get('window').height);
         formData.append('actualImageWidth', actualImageSize.actualWidth);
         formData.append('actualImageHeight', actualImageSize.actualHeight);
 
-        fetch(url + 'RemoveFromGroupPhoto', {
+        fetch(url + 'MergeWithCelebrity', {
             method: 'POST',
             body: formData,
             headers: {
@@ -53,20 +51,22 @@ const App = (props) => {
             },
         })
             .then((response) => {
+
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
                 return response.json();
             })
             .then((data) => {
-                console.log('Image successfully sent to API:');
-                // Navigate to the next screen with the response data
-                navigation.navigate('resultant_removeFromGroup', {
-                    selected: `data:image/png;base64,${data.result_image_base64}`, user_id: user_id,
+                console.log('Image successfully sent to API:', data);
+                navigation.navigate('resultant_addWithCelebrity', {
+                    selected: `data:image/png;base64,${data.result_image_base64}`, x: point.x, y: point.y,
+                    prev_imageWidth: Dimensions.get('window').width, prev_imageHeight: Dimensions.get('window').height,
+                    actualImageWidth: actualImageSize.actualWidth, actualImageHeight: actualImageSize.actualHeight, selectedCelebrity, image, user_id: user_id, id: id
                 });
             })
             .catch((error) => {
-                setLoading(false)
+                setLoading(false);
                 console.error('Error sending image to API:', error);
             });
     };
@@ -82,8 +82,8 @@ const App = (props) => {
             <View style={{ flex: 1 }}>
                 <View style={styles.imageContainer}>
                     <Image
-                        style={{ width: Dimensions.get('window').width, height: imageHeight, resizeMode: 'contain' }}
-                        source={{ uri: selected.uri }}
+                        style={{ width: Dimensions.get('window').width, height: height = ((Dimensions.get('window').width) / (width)) * height, resizeMode: 'contain' }}
+                        source={{ uri: `data:image/jpeg;base64,${selectedCelebrity}` }}
                         onTouchEnd={handleImagePress}
                         onLayout={(event) => {
                             const { width, height } = event.nativeEvent.layout;
@@ -109,12 +109,11 @@ const App = (props) => {
                     {loading ? (
                         <ActivityIndicator size="large" color="#0000ff" />
                     ) : (
-                        <TouchableOpacity onPress={() => handleRemove()} style={styles.button}>
-                            <Text style={{ color: '#fff' }}>Remove</Text>
+                        <TouchableOpacity onPress={() => handleMerge()} style={styles.button}>
+                            <Text style={{ color: '#fff' }}>Merge</Text>
                         </TouchableOpacity>
                     )}
                 </View>
-
             </View>
         </SafeAreaView>
     );

@@ -1,46 +1,56 @@
 import React, { useEffect, useState } from 'react'
-import { Text, View, StyleSheet, Alert, FlatList, Pressable, TextInput, ImageBackground, Image } from 'react-native'
+import { Text, View, StyleSheet, Alert, FlatList, Pressable, TextInput, ImageBackground, PermissionsAndroid, Image, ActivityIndicator } from 'react-native'
 import { useNavigation } from '@react-navigation/native';
 import url from '../api_url';
 import {
-    launchCamera,
     launchImageLibrary
 } from 'react-native-image-picker';
 
 
-export default function App() {
-
+export default function App(props) {
+    const { user_id } = props.route.params;
     const navigation = useNavigation()
     const [result, setResult] = useState([])
+    const [celebrityIndex, setCelebrityIndex] = useState([]);
     const [celebrities, setCelebrities] = useState([]);
-    const [celebrityIndex,setCelebrityIndex]=useState()
-    const [searchIndex, setSearchIndex] = useState(0);
     const [isSearching, setIsSearching] = useState(false);
     const [image, setImage] = useState('')
     const [filePath, setFilePath] = useState()
     const [selectedCelebrity, setSelectedCelebrity] = useState()
+    const [selectedHeight, setSelectedHeight] = useState()
+    const [selectedWidth, setSelectedWidth] = useState()
+    const [selectedId, setSelectedId] = useState()
 
     useEffect(() => {
         GetAllCelebrities();
-
+        console.log("-------------", selectedCelebrity)
     }, [])
 
-    const GetAllCelebrities = async () => {
-        try {
-            const response = await fetch(url+'GetAllCelebrities');
-            if (response.ok) {
-                console.log(response)
-                const data = await response.json();
-                console.log(data);
-                setCelebrities(data);
-            } else {
-                throw new Error('Failed to fetch celeberities.');
-            }
-        } catch (error) {
-            console.error('Error occurred during API request:', error)
-        }
+    const MAX_RETRIES = 10;
+    const RETRY_DELAY = 1000;
 
+    const GetAllCelebrities = async () => {
+        let retries = 0;
+        while (retries < MAX_RETRIES) {
+            try {
+                const res = await fetch(`${url}GetAllCelebrities`);
+                if (!res.ok) {
+                    throw new Error('Failed to fetch celebrities');
+                }
+                const data = await res.json();
+                console.log(data);
+
+                setCelebrities(data);
+                return; // Exit function if successful
+            } catch (error) {
+                console.log("Error while getting celebrities:", error);
+                retries++;
+                await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+            }
+        }
+        console.log("Max retries reached. Unable to fetch celebrities.");
     }
+
 
     const GetSearchItems = async (text) => {
         try {
@@ -54,7 +64,7 @@ export default function App() {
 
             if (response.ok) {
                 const data = await response.json();
-                setResult(data); // Assuming you have a state variable 'results' to store search results
+                setResult(data);
             } else {
                 console.log('No item found', response.status);
             }
@@ -65,9 +75,9 @@ export default function App() {
 
 
     const renderCelebrityItem = ({ item, index }) => (
-        <Pressable onPress={()=>{setSelectedCelebrity(item.image)}} style={style.box}>
+        <Pressable onPress={() => { setSelectedCelebrity(item.image), setSelectedHeight(item.height), setSelectedWidth(item.width), setSelectedId(item.id) }} style={style.box}>
             <Image source={{ uri: `data:image/jpeg;base64,${item.image}` }} style={style.image} />
-            
+
         </Pressable>
     );
 
@@ -82,37 +92,9 @@ export default function App() {
     );
 
 
-    const requestExternalWritePermission = async () => {
-        if (Platform.OS === 'android') {
-            try {
-                const granted = await PermissionsAndroid.request(
-                    PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-                    {
-                        title: 'External Storage Write Permission',
-                        message: 'App needs write permission',
-                    },
-                );
-
-                // If WRITE_EXTERNAL_STORAGE Permission is granted or denied
-                if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-                    // Permission granted
-                    return true;
-                } else {
-                    // Permission denied or not prompted
-                    return false;
-                }
-            } catch (err) {
-                console.warn(err);
-                return false;
-            }
-        } else {
-            return true;
-        }
-
-    };
 
     const chooseFile = (type) => {
-        requestExternalWritePermission()
+
         let options = {
             mediaType: type,
             maxWidth: 300,
@@ -152,6 +134,9 @@ export default function App() {
             }
         });
     };
+    const handleExtractButtonClick = () => {
+        navigation.navigate('add_with_celebrity_test', { selectedCelebrity: selectedCelebrity, image: image, user_id: user_id, height: selectedHeight, width: selectedWidth, id: selectedId });
+    };
 
 
     return (
@@ -161,6 +146,7 @@ export default function App() {
                 style={style.background}
             >
             </ImageBackground>
+
             <View style={style.container}>
                 <Pressable style={style.upload} onPress={() => chooseFile('photo')}>
                     <Text style={{ color: '#ac326a', fontSize: 18, fontFamily: 'Poppins Bold', fontWeight: 'bold' }}>
@@ -206,37 +192,42 @@ export default function App() {
                                 setCelebrityIndex(newIndex);
                             }}
                         />
-
-
                     </>
                 )}
 
+                {selectedCelebrity && image &&
+                    <View style={{ flex: 1, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginTop: 80, marginLeft: 20 }}>
 
+                        <Pressable onPress={() => { handleExtractButtonClick() }} style={{ backgroundColor: '#FFF', padding: 15, marginHorizontal: 300, marginVertical: 50, borderRadius: 150, marginRight: 10 }} >
+                            <Image source={require('../assets/right.png')} style={{ height: 30, width: 30 }}></Image>
+                        </Pressable>
+                    </View>
+                }
+                {selectedCelebrity && image &&
 
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', }}>
 
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginTop: 80, }}>
-                    {image &&
+                        <View style={style.SelectBox}>
+
+                            <Image
+                                source={{ uri: `data:image/jpeg;base64,${selectedCelebrity}` }}
+                                style={style.SelectImage}
+                            />
+                        </View>
+
                         <View style={style.SelectBox}>
 
                             <Image
                                 source={{ uri: image.uri }}
                                 style={style.SelectImage}
                             />
-
                         </View>
-                    }
-                    {selectedCelebrity &&
-                        <View style={style.SelectBox}>
-                            <Image source={{ uri: `data:image/jpeg;base64,${selectedCelebrity}` }}
-                                style={style.SelectImage}
-                            />
-
-                        </View>
-                    }
-
-                </View>
+                    </View>
+                }
             </View>
+
         </View >
+
     )
 }
 const style = StyleSheet.create({
@@ -248,6 +239,17 @@ const style = StyleSheet.create({
         height: 900,
         width: 500,
         flex: 1
+    },
+    SelectBox: {
+        backgroundColor: '#FCFCFC',
+        borderRadius: 15,
+        marginHorizontal: 10,
+        marginVertical: 20,
+        elevation: 3,
+        width: 110,
+        height: 110,
+        alignItems: 'center',
+        justifyContent: 'center'
     },
     upload: {
         backgroundColor: '#FCFCFC',
@@ -308,6 +310,12 @@ const style = StyleSheet.create({
         height: 110,
         alignItems: 'center',
         justifyContent: 'center'
+    },
+    SelectImage: {
+        width: 100,
+        height: 100,
+        borderRadius: 10,
+
     },
     SelectImage: {
         width: 100,

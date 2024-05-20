@@ -23,7 +23,7 @@ export default function App(props) {
 
     const GetAllBackgrounds = async () => {
         try {
-            const response = await fetch(`${url}GetAllBackgrounds`);
+            const response = await fetch(`${url}getAllBackgrounds`);
             if (response.ok) {
                 console.log(response)
                 const data = await response.json();
@@ -101,7 +101,7 @@ export default function App(props) {
                             },
                         ]
                     )
-                }} style={{ backgroundColor: '#fcfcfc', opacity: 0.8, position: 'absolute', borderRadius: 20, alignItems: 'center', justifyContent: 'center', width: 40, height: 40, }}>
+                }} style={{ backgroundColor: '#fcfcfc', opacity: 0.8, borderRadius: 20, justifyContent: 'center', width: 40, height: 40, position: 'absolute' }}>
                     <Image
                         source={require('../assets/remove.png')}
                         style={{ height: 20, width: 20, tintColor: 'red', }}
@@ -113,7 +113,7 @@ export default function App(props) {
                 <Pressable onPress={() =>
                     navigation.navigate('editTemplate', { id: item.id, name: item.name, category: item.category, type: item.type, image: item.image })
                 }
-                    style={{ backgroundColor: '#fcfcfc', opacity: 0.8, position: 'absolute', borderRadius: 20, width: 40, height: 40, marginLeft: 7, marginRight: 4 }}>
+                    style={{ backgroundColor: '#fcfcfc', opacity: 0.8, borderRadius: 20, width: 40, height: 40, marginLeft: 7, marginRight: 4 }}>
                     <Image
                         source={require('../assets/edit.png')}
                         style={{ height: 20, width: 20, tintColor: 'red', }}
@@ -135,7 +135,7 @@ export default function App(props) {
 
             if (response.ok) {
                 Alert.alert('Success', 'Template deleted successfully.');
-                getAllBackgrounds();
+                GetAllBackgrounds();
                 GetAllCelebrities();
             } else {
                 console.error('deletion failed:');
@@ -181,7 +181,7 @@ export default function App(props) {
                 <Pressable onPress={() =>
                     navigation.navigate('edit_template', { id: item.id, name: item.name, category: item.category, type: item.type, image: item.image })
                 }
-                    style={{ backgroundColor: '#fcfcfc', opacity: 0.8, position: 'absolute', borderRadius: 20, width: 40, height: 40, marginLeft: 7, marginRight: 20, justifyContent: 'center' }}>
+                    style={{ backgroundColor: '#fcfcfc', opacity: 0.8, borderRadius: 20, width: 40, height: 40, marginLeft: 7, marginRight: 20, justifyContent: 'center' }}>
                     <Image
                         source={require('../assets/edit.png')}
                         style={{ height: 20, width: 20, tintColor: 'red', }}

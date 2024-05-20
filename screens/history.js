@@ -36,20 +36,21 @@ const ModalContent = ({ visible, item, onClose }) => (
     </Modal>
 );
 
-export default function App() {
+export default function App(props) {
     const [history, setHistory] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedImage, setSelectedImage] = useState(null);
-
+    const { user_id } = props.route.params
     useEffect(() => {
         getData();
     }, []);
 
     const getData = async () => {
         try {
-            const response = await fetch(`${url}GetUserProcessedImages/2`);
+            const response = await fetch(`${url}GetUserProcessedImages/${user_id}`);
             if (response.ok) {
                 const data = await response.json();
+                console.log(data)
                 setHistory(data);
             } else {
                 throw new Error('Failed to fetch history');
@@ -75,12 +76,20 @@ export default function App() {
                 source={require('../assets/Imagebg.png')}
                 style={styles.background}
             />
-            {history.map(item => (
-                <ImageItem key={item.id} item={item} onPressDetails={handleDetailsPress} />
-            ))}
+            {history.length > 0 && user_id != 0 ? (
+                history.map(item => (
+                    <ImageItem key={item.id} item={item} onPressDetails={handleDetailsPress} />
+                ))
+            ) : (
+
+
+                <Text style={styles.noHistoryText}>No history to show</Text>
+
+            )}
             <ModalContent visible={modalVisible} item={selectedImage} onClose={handleCloseModal} />
         </View>
     );
+
 }
 
 const styles = StyleSheet.create({
@@ -147,6 +156,13 @@ const styles = StyleSheet.create({
         resizeMode: 'contain',
         margin: 18,
 
+
+    },
+    noHistoryText: {
+        fontSize: 18,
+        color: '#2b3048',
+        alignSelf: 'center',
+        opacity: 0.8
 
     },
 });

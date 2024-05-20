@@ -9,7 +9,7 @@ import { useNavigation } from '@react-navigation/native';
 
 
 export default function App(props) {
-
+const{user_id}=props.route.params
     const navigation = useNavigation()
     const [image, setImage] = useState('')
     const [filePath, setFilePath] = useState()
@@ -50,8 +50,6 @@ export default function App(props) {
         requestExternalWritePermission()
         let options = {
             mediaType: type,
-            maxWidth: 300,
-            maxHeight: 550,
             quality: 1,
             includeBase64: true
         };
@@ -91,7 +89,7 @@ export default function App(props) {
 
     const handleExtractButtonClick = () => {
         // Navigate to the next screen and pass the 'image' state as a parameter
-        navigation.navigate('remove_from_group_test', { selected: image });
+        navigation.navigate('remove_from_group_test', { selected: image ,user_id:user_id});
     };
 
     return (

@@ -1,12 +1,16 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Text, View, StyleSheet, Pressable, ImageBackground, Image } from 'react-native'
 import { useNavigation } from '@react-navigation/native';
-
 
 const App = (props) => {
 
     const navigation = useNavigation()
-        return (
+    const { user_id } = props.route?.params || { user_id: 0 };
+    useEffect(() => {
+        console.log("---------", user_id)
+    }, [])
+
+    return (
         <View>
             <ImageBackground
                 source={require('../assets/Imagebg.png')}
@@ -26,7 +30,7 @@ const App = (props) => {
                 <View>
 
                     <View style={{ flexDirection: 'row' }}>
-                        <Pressable onPress={() => navigation.navigate('background')} style={style.box}>
+                        <Pressable onPress={() => navigation.navigate('background', { user_id: user_id })} style={style.box}>
                             <Image
                                 source={require('../assets/gallery1.png')}
                                 style={style.image}
@@ -34,7 +38,7 @@ const App = (props) => {
                             <Text style={style.label}>BACKGROUND</Text>
                         </Pressable>
 
-                        <Pressable onPress={() => navigation.navigate('celebrity')} style={[style.box, {}]}>
+                        <Pressable onPress={() => navigation.navigate('celebrity', { user_id: user_id })} style={[style.box, {}]}>
 
                             <Image
                                 source={require('../assets/star.png')}
@@ -44,14 +48,14 @@ const App = (props) => {
                         </Pressable>
                     </View>
                     <View style={{ flexDirection: 'row' }}>
-                        <Pressable onPress={() => navigation.navigate('group_photo')} style={style.box}>
+                        <Pressable onPress={() => navigation.navigate('group_photo', { user_id: user_id })} style={style.box}>
                             <Image
                                 source={require('../assets/AddGroup.png')}
                                 style={style.image}
                             />
                             <Text style={style.label}>ADD TO GROUP</Text>
                         </Pressable>
-                        <Pressable style={style.box} onPress={() => { navigation.navigate('remove_from_group') }}>
+                        <Pressable style={style.box} onPress={() => { navigation.navigate('remove_from_group', { user_id: user_id }) }}>
 
                             <Image
                                 source={require('../assets/removeUSer.png')}
@@ -62,30 +66,37 @@ const App = (props) => {
                     </View>
                 </View>
                 <View>
-                    <Pressable
-                        onPress={() => {
-                            navigation.navigate('signUp');
-                        }}
-                        style={{ backgroundColor: '#FCFCFC', paddingHorizontal: 50, paddingVertical: 20, margin: 20, marginHorizontal: 35, borderRadius: 35, marginTop: 50 }} >
-                        <Text style={{ alignSelf: 'center', fontWeight: 'bold', fontSize: 18, color: '#AC326A' }} onPress={() => { navigation.navigate('signUp') }}>REGISTER NEW ACCOUNT</Text></Pressable>
-                    <View style={style.loginText}>
-                        <Text style={{ fontSize: 17, marginLeft: 15, color: '#4C4B49' }}>Already have an account?  </Text>
-                        <Pressable><Text style={{ color: '#ac326a', fontSize: 16, fontWeight: 'bold', textDecorationLine: 'underline' }} onPress={() => {
-                            navigation.navigate('Login');
-                        }}>LOGIN</Text></Pressable>
-                    </View>
+                    {user_id == 0 && (
+                        <>
+                            <Pressable
+                                onPress={() => {
+                                    navigation.navigate('signUp');
+                                }}
+                                style={{ backgroundColor: '#FCFCFC', paddingHorizontal: 50, paddingVertical: 20, margin: 20, marginHorizontal: 35, borderRadius: 35, marginTop: 50 }} >
+                                <Text style={{ alignSelf: 'center', fontWeight: 'bold', fontSize: 18, color: '#AC326A' }} onPress={() => { navigation.navigate('signUp') }}>REGISTER NEW ACCOUNT</Text></Pressable>
+                            <View style={style.loginText}>
+                                <Text style={{ fontSize: 17, marginLeft: 15, color: '#4C4B49' }}>Already have an account?  </Text>
+                                <Pressable><Text style={{ color: '#ac326a', fontSize: 16, fontWeight: 'bold', textDecorationLine: 'underline' }} onPress={() => {
+                                    navigation.navigate('Login');
+                                }}>LOGIN</Text></Pressable>
+                            </View>
+                        </>
+                    )}
                 </View>
+
             </View>
             <View style={style.bottomBarContainer}>
                 <View style={style.bottomBar}>
                     <Pressable onPress={() => navigation.navigate('dashboard')}>
                         <Image source={require('../assets/home.png')} style={style.icon} />
                     </Pressable>
-                    <Pressable onPress={() => navigation.navigate('history')}>
+                    <Pressable onPress={() => navigation.navigate('history', { user_id: user_id })}>
                         <Image source={require('../assets/history.png')} style={style.icon} />
                     </Pressable>
+                    <Pressable onPress={() => navigation.navigate('asset', { user_id: user_id })}>
+                        <Image source={require('../assets/asset.png')} style={style.icon} />
 
-                    <Image source={require('../assets/account.png')} style={style.icon} />
+</Pressable>
                 </View>
             </View>
         </View >
@@ -141,7 +152,7 @@ const style = StyleSheet.create({
     },
     bottomBarContainer: {
         marginTop: 10,
-       
+
     },
     bottomBar: {
         flexDirection: 'row',
@@ -150,7 +161,7 @@ const style = StyleSheet.create({
         height: 60,
         borderTopWidth: 1,
         borderTopColor: '#EAEAEA',
-        alignItems:'center'
+        alignItems: 'center'
     },
     icon: {
         width: 30,

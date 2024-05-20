@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Text, View, StyleSheet, Pressable, TextInput, ImageBackground, PermissionsAndroid, Image } from 'react-native'
 import {
     launchCamera,
@@ -7,45 +7,18 @@ import {
 
 import { useNavigation } from '@react-navigation/native';
 
-export default function App() {
+export default function App(props) {
 
     const navigation = useNavigation();
-
+    const { user_id } = props.route.params
     const [individualImage, setIndividualImage] = useState('')
     const [groupImage, setGroupImage] = useState('')
     const [filePath, setFilePath] = useState('')
-
-    const requestExternalWritePermission = async () => {
-        if (Platform.OS === 'android') {
-            try {
-                const granted = await PermissionsAndroid.request(
-                    PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-                    {
-                        title: 'External Storage Write Permission',
-                        message: 'App needs write permission',
-                    },
-                );
-
-                // If WRITE_EXTERNAL_STORAGE Permission is granted or denied
-                if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-                    // Permission granted
-                    return true;
-                } else {
-                    // Permission denied or not prompted
-                    return false;
-                }
-            } catch (err) {
-                console.warn(err);
-                return false;
-            }
-        } else {
-            return true;
-        }
-
-    };
+    useEffect(() => {
+        console.log("---------", user_id)
+    }, [])
 
     const chooseFile = (type) => {
-        requestExternalWritePermission()
         let options = {
             mediaType: type,
             quality: 1,
@@ -91,7 +64,7 @@ export default function App() {
 
     const handleExtractButtonClick = () => {
         // Navigate to the next screen and pass the 'image' state as a parameter
-        navigation.navigate('add_to_group', { selectedGroup: groupImage, selectedIndividual: individualImage });
+        navigation.navigate('add_to_group_test', { selectedGroup: groupImage, selectedIndividual: individualImage, user_id: user_id });
     };
 
     return (
@@ -118,22 +91,18 @@ export default function App() {
 
                     <Pressable onPress={() => { chooseFile('group') }} style={[style.box, {}]}>
 
-                        <View>
-                            <Image
-                                source={require('../assets/upload.png')}
-                                style={style.image}
-                            />
-                            <Text style={style.label}>GROUP PICTURE</Text>
-                        </View>
-
-
+                        <Image
+                            source={require('../assets/upload.png')}
+                            style={style.image}
+                        />
+                        <Text style={style.label}>GROUP PICTURE</Text>
 
                     </Pressable>
                 </View>
                 {groupImage && individualImage &&
-                    <View style={{ flex: 1, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginTop: 80, }}>
+                    <View style={{ flex: 1, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginTop: 80, marginLeft: 20 }}>
 
-                        <Pressable onPress={handleExtractButtonClick} style={{ backgroundColor: '#FFF', padding: 15, margin: 20, marginHorizontal: 300, borderRadius: 150, marginRight: 10, marginTop: 112 }} >
+                        <Pressable onPress={handleExtractButtonClick} style={{ backgroundColor: '#FFF', padding: 15, margin: 20, marginHorizontal: 300, borderRadius: 150, marginRight: 10, marginTop: 120}} >
                             <Image source={require('../assets/right.png')} style={{ height: 30, width: 30 }}></Image>
                         </Pressable>
                     </View>

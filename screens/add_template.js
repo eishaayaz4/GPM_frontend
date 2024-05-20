@@ -35,7 +35,7 @@ export default function App() {
             formData.append('type', type);
             formData.append('category', category);
             formData.append('image', image)
-           
+
             const response = await fetch(`${url}AddTemplate`, {
                 method: 'POST',
                 headers: {
@@ -48,7 +48,7 @@ export default function App() {
             if (response.ok) {
                 const result = await response.json();
                 console.log(result);
-                // Handle success, show a success message or navigate to another screen
+                Alert.alert("Template added successfully.")
             } else {
                 const error = await response.json();
                 console.error('Error:', error);
@@ -60,7 +60,7 @@ export default function App() {
         }
     };
 
-   
+
 
     const chooseFile = (type) => {
         let options = {
@@ -96,7 +96,7 @@ export default function App() {
                     'name': response.assets[0]?.fileName || '',
                     'type': response.assets[0]?.type || ''
                 });
-               
+
             } else {
                 alert('No image selected');
             }

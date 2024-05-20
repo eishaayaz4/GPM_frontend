@@ -1,41 +1,45 @@
 import React, { useEffect, useState } from 'react'
-import { Text, TextInput, View, FlatList, Pressable, StyleSheet, Image, ImageBackground } from 'react-native';
+import { Text, TextInput, View, FlatList, Pressable, StyleSheet, Image, ImageBackground, ActivityIndicator } from 'react-native';
 import url from '../api_url';
 import { useNavigation } from '@react-navigation/native';
 
 
 const Login = (props) => {
     const navigation = useNavigation()
+    const [id, setId] = useState(0)
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-
+    const [loading, setloading] = useState(false)
     const handleLogin = async () => {
+
         try {
+            setloading(true)
             const response = await fetch(`${url}Login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ email, password }),
-                
+
             });
-console.log(response)
+            console.log(response)
             if (response.ok) {
                 const result = await response.json();
                 console.log(result);
-
-                if (result.role=== 'admin') {
+                
+                if (result.role === 'admin') {
                     navigation.navigate('view_template');
                 } else {
-                    navigation.navigate('dashboard');
+                    navigation.navigate('dashboard', { user_id: result.user_id });
                 }
             } else {
                 console.error('Login failed:', result.Message);
-             }
+            }
         } catch (error) {
+            setloading(false)
             console.error('Error:', error);
-         }
-     };
+        }
+    };
 
 
 
@@ -85,12 +89,22 @@ console.log(response)
                     </View>
                 </View>
                 <View >
-                    <Pressable style={{ backgroundColor: '#AC326A', padding: 15, margin: 20, marginHorizontal: 65, borderRadius: 35 }} onPress={handleLogin}>
-                        <Text style={{ alignSelf: 'center', fontWeight: 'bold', fontSize: 20, color: 'white' }}>Login</Text>
-                    </Pressable>
+                    <View>
+                        {loading ? (
+                            <ActivityIndicator size="large" color="#0000ff" />
+                        ) : (
+                            <Pressable style={{ backgroundColor: '#AC326A', padding: 15, margin: 20, marginHorizontal: 65, borderRadius: 35 }} onPress={handleLogin}>
+                                <Text style={{ alignSelf: 'center', fontWeight: 'bold', fontSize: 20, color: 'white' }}>Login</Text>
+                            </Pressable>
+                        )}
+
+                    </View>
+
+
                     <View style={styles.loginText}>
+
                         <Text style={{ fontSize: 16, marginLeft: 15, color: '#4C4B49' }}>Don't have an account?  </Text>
-                        <Pressable><Text style={{ color: '#ac326a', fontSize: 16, fontWeight: 'bold', textDecorationLine: 'underline' }} onPress={()=>navigation.navigate('signUp')}>Register</Text></Pressable>
+                        <Pressable><Text style={{ color: '#ac326a', fontSize: 16, fontWeight: 'bold', textDecorationLine: 'underline' }} onPress={() => navigation.navigate('signUp')}>Register</Text></Pressable>
                     </View>
 
                 </View>

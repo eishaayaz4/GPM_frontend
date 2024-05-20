@@ -1,50 +1,60 @@
-import React,{useEffect,useState} from 'react'
-import { Text, View, StyleSheet,Alert,FlatList, Pressable, TextInput, ImageBackground, Image } from 'react-native'
+import React, { useEffect, useState } from 'react'
+import { Text, View, StyleSheet, Alert, FlatList, Pressable, TextInput, ImageBackground, PermissionsAndroid, Image, ActivityIndicator } from 'react-native'
 import { useNavigation } from '@react-navigation/native';
 import url from '../api_url';
 import {
-    launchCamera,
     launchImageLibrary
 } from 'react-native-image-picker';
 
 
-export default function App() {
-
+export default function App(props) {
+    const { user_id } = props.route.params;
     const navigation = useNavigation()
-    const [backgrounds, setBackgrounds] = useState([]);
-    const [backgroundIndex, setBackgroundIndex] = useState(0);
     const [result, setResult] = useState([])
-    const [searchIndex, setSearchIndex] = useState(0);
+    const [backgroundIndex, setBackgroundIndex] = useState([]);
+    const [backgrounds, setBackgrounds] = useState([]);
     const [isSearching, setIsSearching] = useState(false);
     const [image, setImage] = useState('')
     const [filePath, setFilePath] = useState()
-    const [selectedBackground,setSelectedBackground]=useState()
-
+    const [selectedBackground, setSelectedBackground] = useState()
+    const [selectedHeight, setSelectedHeight] = useState()
+    const [selectedWidth, setSelectedWidth] = useState()
+    const [selectedId, setSelectedId] = useState()
+    const [loading, setLoading] = useState()
     useEffect(() => {
-        getAllBackgrounds();
-        
+        GetAllBackgrounds();
+        console.log("-------------", selectedBackground)
     }, [])
 
-    const getAllBackgrounds = async () => {
-        try {
-            const response = await fetch(url+'GetAllBackgrounds');
-            if (response.ok) {
-                console.log(response)
-                const data = await response.json();
-                console.log(data);
-                setBackgrounds(data);
-            } else {
-                throw new Error('Failed to fetch backgrounds.');
-            }
-        } catch (error) {
-            console.error('Error occurred during API request:', error)
-        }
+    const MAX_RETRIES = 10;
+    const RETRY_DELAY = 1000;
 
+    const GetAllBackgrounds = async () => {
+        let retries = 0;
+        while (retries < MAX_RETRIES) {
+            try {
+                const res = await fetch(`${url}getAllBackgrounds`);
+                if (!res.ok) {
+                    throw new Error('Failed to fetch backgrounds');
+                }
+                const data = await res.json();
+                console.log(data);
+
+                setBackgrounds(data);
+                return; // Exit function if successful
+            } catch (error) {
+                console.log("Error while getting backgrounds:", error);
+                retries++;
+                await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+            }
+        }
+        console.log("Max retries reached. Unable to fetch backgrounds.");
     }
+
 
     const GetSearchItems = async (text) => {
         try {
-            const response = await fetch(url+`GetBackgroundBySearch/${text}`, {
+            const response = await fetch(url + `getBackgroundBySearch/${text}`, {
                 method: 'POST',
                 headers: {
                     Accept: 'application/json',
@@ -54,7 +64,7 @@ export default function App() {
 
             if (response.ok) {
                 const data = await response.json();
-                setResult(data); // Assuming you have a state variable 'results' to store search results
+                setResult(data);
             } else {
                 console.log('No item found', response.status);
             }
@@ -65,58 +75,26 @@ export default function App() {
 
 
     const renderBackgroundItem = ({ item, index }) => (
-        <Pressable onPress={() => {
-            setSelectedBackground(item.image)
-        } } 
-            style={style.box}>
+        <Pressable onPress={() => { setSelectedBackground(item.image), setSelectedHeight(item.height), setSelectedWidth(item.width), setSelectedId(item.id) }} style={style.box}>
             <Image source={{ uri: `data:image/jpeg;base64,${item.image}` }} style={style.image} />
 
         </Pressable>
     );
 
-   
 
     const renderSearch = ({ item, index }) => (
         <Pressable onPress={() => {
             setSelectedBackground(item.image)
         }} style={style.box}>
             <Image source={{ uri: `data:image/jpeg;base64,${item.image}` }} style={style.image} />
-            
+
         </Pressable>
     );
 
 
-    const requestExternalWritePermission = async () => {
-        if (Platform.OS === 'android') {
-            try {
-                const granted = await PermissionsAndroid.request(
-                    PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-                    {
-                        title: 'External Storage Write Permission',
-                        message: 'App needs write permission',
-                    },
-                );
-
-                // If WRITE_EXTERNAL_STORAGE Permission is granted or denied
-                if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-                    // Permission granted
-                    return true;
-                } else {
-                    // Permission denied or not prompted
-                    return false;
-                }
-            } catch (err) {
-                console.warn(err);
-                return false;
-            }
-        } else {
-            return true;
-        }
-
-    };
 
     const chooseFile = (type) => {
-        requestExternalWritePermission()
+
         let options = {
             mediaType: type,
             maxWidth: 300,
@@ -156,6 +134,49 @@ export default function App() {
             }
         });
     };
+    const handleMergeButtonClick = () => {
+        setLoading(true);
+
+        const formData = new FormData();
+        formData.append('user_id', user_id);
+        formData.append('background_id', selectedId);
+        formData.append('image', {
+            uri: image.uri,
+            name: image.name,
+            type: image.type,
+        });
+
+        fetch(url + 'ChangeBackground', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.blob();
+            })
+            .then((blob) => {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    const base64data = reader.result.split(',')[1];
+                    navigation.navigate('resultant_background', {
+                        selected: `data:image/png;base64,${base64data}`,
+                        user_id: user_id
+                    });
+                    setLoading(false);
+                };
+                reader.readAsDataURL(blob);
+            })
+            .catch((error) => {
+                setLoading(false);
+                console.error('Error sending image to API:', error);
+            });
+    };
+
 
 
     return (
@@ -165,6 +186,7 @@ export default function App() {
                 style={style.background}
             >
             </ImageBackground>
+
             <View style={style.container}>
                 <Pressable style={style.upload} onPress={() => chooseFile('photo')}>
                     <Text style={{ color: '#ac326a', fontSize: 18, fontFamily: 'Poppins Bold', fontWeight: 'bold' }}>
@@ -210,37 +232,42 @@ export default function App() {
                                 setBackgroundIndex(newIndex);
                             }}
                         />
-
-                        
                     </>
                 )}
 
+                {selectedBackground && image &&
+                    <View style={{ flex: 1, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginTop: 80, marginLeft: 20 }}>
 
-                 
+                        <Pressable onPress={() => { handleMergeButtonClick() }} style={{ backgroundColor: '#FFF', padding: 15, marginHorizontal: 300, marginVertical: 50, borderRadius: 150, marginRight: 10 }} >
+                            <Image source={require('../assets/right.png')} style={{ height: 30, width: 30 }}></Image>
+                        </Pressable>
+                    </View>
+                }
+                {selectedBackground && image &&
 
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginTop: 80, }}>
-                    {image &&
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', }}>
+
                         <View style={style.SelectBox}>
-                        
+
+                            <Image
+                                source={{ uri: `data:image/jpeg;base64,${selectedBackground}` }}
+                                style={style.SelectImage}
+                            />
+                        </View>
+
+                        <View style={style.SelectBox}>
+
                             <Image
                                 source={{ uri: image.uri }}
                                 style={style.SelectImage}
                             />
-
                         </View>
-                    }
-                    {selectedBackground &&
-                        <View style={style.SelectBox}>
-                            <Image source={{ uri: `data:image/jpeg;base64,${selectedBackground}` }}
-                                style={style.SelectImage}
-                            />
-
-                        </View>
-                    }
-                   
-                </View>
+                    </View>
+                }
             </View>
+
         </View >
+
     )
 }
 const style = StyleSheet.create({
@@ -252,6 +279,17 @@ const style = StyleSheet.create({
         height: 900,
         width: 500,
         flex: 1
+    },
+    SelectBox: {
+        backgroundColor: '#FCFCFC',
+        borderRadius: 15,
+        marginHorizontal: 10,
+        marginVertical: 20,
+        elevation: 3,
+        width: 110,
+        height: 110,
+        alignItems: 'center',
+        justifyContent: 'center'
     },
     upload: {
         backgroundColor: '#FCFCFC',
@@ -312,6 +350,12 @@ const style = StyleSheet.create({
         height: 110,
         alignItems: 'center',
         justifyContent: 'center'
+    },
+    SelectImage: {
+        width: 100,
+        height: 100,
+        borderRadius: 10,
+
     },
     SelectImage: {
         width: 100,

@@ -5,11 +5,11 @@ import RNFetchBlob from 'rn-fetch-blob';
 import url from '../api_url';
 export default function App(props) {
     const navigation = useNavigation();
-    let { selected, x, y, prev_imageWidth, prev_imageHeight, actualImageWidth, actualImageHeight, selectedGroup, selectedIndividual, user_id } = props.route.params;
+    let { selected, x, y, prev_imageWidth, prev_imageHeight, actualImageWidth, actualImageHeight, selectedCelebrity, image, user_id, id } = props.route.params;
     const [imageWidth, setImageWidth] = useState(0);
     const [imageHeight, setImageHeight] = useState(0);
     const [loading, setLoading] = useState(false);
-    const description = "Persson added in a group photo"
+    const description = "Person added with a celebrity"
     useEffect(() => {
         if (selected) {
             console.log("-------", x, y, prev_imageWidth, prev_imageHeight, actualImageWidth, actualImageHeight)
@@ -33,15 +33,11 @@ export default function App(props) {
         console.log("-------", user_id, x, y, prev_imageWidth, prev_imageHeight, actualImageWidth, actualImageHeight)
 
         const formData = new FormData();
-        formData.append('groupImage', {
-            uri: selectedGroup.uri,
-            name: selectedGroup.name,
-            type: selectedGroup.type,
-        });
-        formData.append('individualImage', {
-            uri: selectedIndividual.uri,
-            name: selectedIndividual.name,
-            type: selectedIndividual.type,
+        formData.append('id', id);
+        formData.append('image', {
+            uri: image.uri,
+            name: image.name,
+            type: image.type,
         });
         formData.append('x', x);
         formData.append('y', y);
@@ -50,7 +46,7 @@ export default function App(props) {
         formData.append('actualImageWidth', actualImageWidth);
         formData.append('actualImageHeight', actualImageHeight);
 
-        fetch(`${url}addToGroup`, {
+        fetch(`${url}MergeWithCelebrity`, {
             method: 'POST',
             body: formData,
             headers: {
@@ -65,10 +61,10 @@ export default function App(props) {
             })
             .then((data) => {
                 console.log('Image successfully sent to API:', data);
-                navigation.navigate('resutant_addToGroup', {
+                navigation.navigate('resultant_addWithCelebrity', {
                     selected: `data:image/png;base64,${data.result_image_base64}`, x: x, y: y,
                     prev_imageWidth: prev_imageWidth, prev_imageHeight: prev_imageHeight, actualImageWidth: actualImageWidth,
-                    actualImageHeight: actualImageHeight, selectedGroup, selectedIndividual, user_id: user_id
+                    actualImageHeight: actualImageHeight, selectedCelebrity, image, user_id: user_id, id: id
                 });
                 setLoading(false)
             })

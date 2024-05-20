@@ -1,14 +1,15 @@
-import React, { useEffect, useState } from 'react'
-import { View, Text, StyleSheet, TouchableOpacity, PermissionsAndroid, Platform, Image, Dimensions, ImageBackground, Pressable, Alert } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Image, Dimensions, ImageBackground, Alert, ActivityIndicator, PermissionsAndroid, TouchableOpacity, Pressable } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import RNFetchBlob from 'rn-fetch-blob';
 import url from '../api_url';
 export default function App(props) {
-    const navigattion = useNavigation();
-    const { selected, user_id } = props.route.params;
+    const navigation = useNavigation();
+    let { selected, user_id } = props.route.params;
     const [imageWidth, setImageWidth] = useState(0);
     const [imageHeight, setImageHeight] = useState(0);
-    const description = "Person removed from a group photo"
+    const [loading, setLoading] = useState(false);
+    const description = "changed background"
     useEffect(() => {
         if (selected) {
             Image.getSize(selected, (width, height) => {
@@ -18,12 +19,15 @@ export default function App(props) {
                 setImageWidth(screenWidth);
                 setImageHeight(calculatedHeight);
                 console.log('Image dimensions:', width, height);
+                console.log("-------", x, y, prev_imageWidth, prev_imageHeight, actualImageWidth, actualImageHeight)
 
             }, (error) => {
                 console.log('Error getting image dimensions:', error);
             });
         }
     }, [selected]);
+
+    
 
     const handleInsert = async () => {
         try {
@@ -96,56 +100,76 @@ export default function App(props) {
         }
     };
 
-
     return (
-        <View style={{ justifyContent: 'space-between' }}>
-            <ImageBackground
-                source={require('../assets/Imagebg.png')}
-                style={styles.background}
-            >
-            </ImageBackground>
-
-
-            {selected && selected.startsWith('data:image/jpeg;base64,') ? (
-                <Image
-                    style={{ width: imageWidth, height: imageHeight }}
-                    source={{ uri: selected }}
-                    resizeMode="contain"
+        <View style={styles.container}>
+            <View style={styles.topContainer}>
+                <ImageBackground
+                    source={require('../assets/Imagebg.png')}
+                    style={styles.background}
                 />
-            ) : (
-                <Image
-                    style={{ width: imageWidth, height: imageHeight }}
-                    source={{ uri: selected }}
-                    resizeMode="contain"
-                />
-            )}
-            <View style={{
-                 alignItems: 'center', 
-                margintop: 80, }}>
-                <TouchableOpacity onPress={() => handleDownload()} style={styles.button}>
-                    <Text style={{ color: '#fff',fontWeight:'bold'}}>Download</Text>
-                </TouchableOpacity>
             </View>
+
+            <View>
+                {selected && (
+                    <Image
+                        style={{ width: imageWidth, height: imageHeight }}
+                        source={{ uri: selected }}
+                        resizeMode="contain"
+                    />
+                )}
+            </View>
+
+
+            <View>
+
+                <TouchableOpacity onPress={() => handleDownload()} style={styles.button}>
+                    <Text style={{ color: '#fff', paddingHorizontal: 62 }}>Download</Text>
+                </TouchableOpacity>
+
+            </View>
+
         </View>
-    )
+    );
 }
+
 const styles = StyleSheet.create({
     container: {
+
         backgroundColor: '#fff',
         alignItems: 'center',
+    },
+    topContainer: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        // Adjust this value as needed
     },
     background: {
         height: 900,
         width: 500,
-        flex: 1
+        flex: 1,
+    },
+    bottomBar: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        backgroundColor: '#eaeaea',
+        width: '100%',
+
+    },
+    icon: {
+        width: 30,
+        height: 30,
     },
     button: {
         backgroundColor: '#ac326a',
-        width: '50%',
-        height: 60,
+        width: '90%',
+        height: 50,
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 10,
         marginTop: 40,
     }
-})
+});

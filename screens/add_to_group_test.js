@@ -4,16 +4,18 @@ import { useNavigation } from '@react-navigation/native';
 import url from '../api_url';
 const App = (props) => {
     const [loading, setLoading] = useState(false)
-    const { selected, user_id } = props.route.params;
+    const { selectedGroup, selectedIndividual, user_id } = props.route.params;
     const navigation = useNavigation()
     const [point, setPoint] = useState({ x: null, y: null });
     const [imageHeight, setImageHeight] = useState(null);
     const [actualImageSize, setActualImageSize] = useState({ actualWidth: null, actualHeight: null })
 
     useEffect(() => {
-        console.log("Selected Image ======", selected)
+        console.log("Selected  group Image ======", selectedGroup.uri)
+        console.log("Selected  individual Image ====== ", selectedIndividual.uri)
+        console.log("user id", user_id)
 
-        Image.getSize(selected.uri,
+        Image.getSize(selectedGroup.uri,
             (width, height) => {
                 setActualImageSize({ actualWidth: width, actualHeight: height })
                 height = ((Dimensions.get('window').width) / (width)) * height
@@ -22,6 +24,7 @@ const App = (props) => {
             (error) => {
                 console.error('Error getting image size:', error);
             }
+
         );
     }, []);
 
@@ -30,13 +33,20 @@ const App = (props) => {
         console.log("Marked Points ======", locationX, locationY)
         setPoint({ x: locationX, y: locationY });
     };
-    const handleRemove = () => {
-        setLoading(true)
+    const handleMerge = () => {
+        setLoading(true);
+        console.log("Selected points ======", actualImageSize.actualHeight, actualImageSize.actualWidth, imageHeight, Dimensions.get('window').width, point.x, point.y)
+
         const formData = new FormData();
-        formData.append('image', {
-            uri: selected.uri,
-            name: selected.name,
-            type: selected.type,
+        formData.append('groupImage', {
+            uri: selectedGroup.uri,
+            name: selectedGroup.name,
+            type: selectedGroup.type,
+        });
+        formData.append('individualImage', {
+            uri: selectedIndividual.uri,
+            name: selectedIndividual.name,
+            type: selectedIndividual.type,
         });
         formData.append('x', point.x);
         formData.append('y', point.y);
@@ -45,7 +55,7 @@ const App = (props) => {
         formData.append('actualImageWidth', actualImageSize.actualWidth);
         formData.append('actualImageHeight', actualImageSize.actualHeight);
 
-        fetch(url + 'RemoveFromGroupPhoto', {
+        fetch( url  + 'addToGroup', {
             method: 'POST',
             body: formData,
             headers: {
@@ -59,14 +69,15 @@ const App = (props) => {
                 return response.json();
             })
             .then((data) => {
-                console.log('Image successfully sent to API:');
-                // Navigate to the next screen with the response data
-                navigation.navigate('resultant_removeFromGroup', {
-                    selected: `data:image/png;base64,${data.result_image_base64}`, user_id: user_id,
+                console.log('Image successfully sent to API:', data);
+                navigation.navigate('resutant_addToGroup', {
+                    selected: `data:image/png;base64,${data.result_image_base64}`, x: point.x, y: point.y,
+                    prev_imageWidth: Dimensions.get('window').width, prev_imageHeight: imageHeight,
+                    actualImageWidth: actualImageSize.actualWidth, actualImageHeight: actualImageSize.actualHeight, selectedGroup, selectedIndividual, user_id: user_id
                 });
             })
             .catch((error) => {
-                setLoading(false)
+                setLoading(false);
                 console.error('Error sending image to API:', error);
             });
     };
@@ -83,11 +94,11 @@ const App = (props) => {
                 <View style={styles.imageContainer}>
                     <Image
                         style={{ width: Dimensions.get('window').width, height: imageHeight, resizeMode: 'contain' }}
-                        source={{ uri: selected.uri }}
+                        source={{ uri: selectedGroup.uri }}
                         onTouchEnd={handleImagePress}
                         onLayout={(event) => {
                             const { width, height } = event.nativeEvent.layout;
-                            console.log("Image width & height ====>", width, height)
+                            
                         }}
                     />
                     {point.x !== null && point.y !== null && (
@@ -109,12 +120,11 @@ const App = (props) => {
                     {loading ? (
                         <ActivityIndicator size="large" color="#0000ff" />
                     ) : (
-                        <TouchableOpacity onPress={() => handleRemove()} style={styles.button}>
-                            <Text style={{ color: '#fff' }}>Remove</Text>
+                        <TouchableOpacity onPress={() => handleMerge()} style={styles.button}>
+                            <Text style={{ color: '#fff' }}>Merge</Text>
                         </TouchableOpacity>
                     )}
                 </View>
-
             </View>
         </SafeAreaView>
     );
