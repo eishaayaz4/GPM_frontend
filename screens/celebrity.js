@@ -135,9 +135,38 @@ export default function App(props) {
         });
     };
     const handleExtractButtonClick = () => {
+        if (user_id && user_id != 0) {
+            addAsset()
+        }
         navigation.navigate('add_with_celebrity_test', { selectedCelebrity: selectedCelebrity, image: image, user_id: user_id, height: selectedHeight, width: selectedWidth, id: selectedId });
     };
+    function addAsset() {
 
+        const formData = new FormData();
+        formData.append('user_id', user_id);
+        formData.append('image', {
+            uri: image.uri,
+            name: image.name,
+            type: image.type,
+        });
+
+        const response = fetch(url + 'AddAsset', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        })
+
+        if (response.ok) {
+            console.log(" add to asset")
+        }
+
+        else {
+            console.log("adding asset failed")
+        }
+        return response
+    }
 
     return (
         <View>

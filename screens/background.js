@@ -97,8 +97,6 @@ export default function App(props) {
 
         let options = {
             mediaType: type,
-            maxWidth: 300,
-            maxHeight: 550,
             quality: 1,
             includeBase64: true
         };
@@ -134,7 +132,44 @@ export default function App(props) {
             }
         });
     };
+
+
+    function addAsset() {
+
+        const formData = new FormData();
+        formData.append('user_id', user_id);
+        formData.append('image', {
+            uri: image.uri,
+            name: image.name,
+            type: image.type,
+        });
+
+        const response = fetch(url + 'AddAsset', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        })
+
+        if (!response.ok) {
+            console.log("couldnot add to asset")
+        }
+
+        else {
+            console.log("asset added")
+        }
+        return response
+    }
+
+
+
+
     const handleMergeButtonClick = () => {
+        if (user_id && user_id != 0) {
+            addAsset()
+        }
+
         setLoading(true);
 
         const formData = new FormData();

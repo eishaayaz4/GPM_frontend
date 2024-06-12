@@ -6,10 +6,10 @@ import {
 } from 'react-native-image-picker';
 import { useNavigation } from '@react-navigation/native';
 
-
+import url from '../api_url';
 
 export default function App(props) {
-const{user_id}=props.route.params
+    const { user_id } = props.route.params
     const navigation = useNavigation()
     const [image, setImage] = useState('')
     const [filePath, setFilePath] = useState()
@@ -87,9 +87,40 @@ const{user_id}=props.route.params
         });
     };
 
+    function addAsset() {
+
+        const formData = new FormData();
+        formData.append('user_id', user_id);
+        formData.append('image', {
+            uri: image.uri,
+            name: image.name,
+            type: image.type,
+        });
+
+        const response = fetch(url + 'AddAsset', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        })
+
+        if (response.ok) {
+            console.log(" add to asset")
+        }
+
+        else {
+            console.log("adding asset failed")
+        }
+        return response
+    }
+
+
     const handleExtractButtonClick = () => {
-        // Navigate to the next screen and pass the 'image' state as a parameter
-        navigation.navigate('remove_from_group_test', { selected: image ,user_id:user_id});
+        if (user_id && user_id != 0) {
+            addAsset()
+        }
+        navigation.navigate('remove_from_group_test', { selected: image, user_id: user_id });
     };
 
     return (

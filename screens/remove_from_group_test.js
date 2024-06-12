@@ -25,6 +25,8 @@ const App = (props) => {
         );
     }, []);
 
+
+    
     const handleImagePress = (event) => {
         const { locationX, locationY } = event.nativeEvent;
         console.log("Marked Points ======", locationX, locationY)

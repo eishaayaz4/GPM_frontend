@@ -73,6 +73,8 @@ export default function App(props) {
 
     const downloadImage = async () => {
         try {
+            const timestamp = new Date().getTime();
+
             const granted = await PermissionsAndroid.request(
                 PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
                 {
@@ -83,10 +85,11 @@ export default function App(props) {
             if (granted === PermissionsAndroid.RESULTS.GRANTED) {
                 // Strip the data URL prefix if present
                 const base64Data = selected.replace(/^data:image\/(jpeg|jpg|png);base64,/, '');
-                const imagePath = RNFetchBlob.fs.dirs.DownloadDir + '/image.jpg'; // Change the file name and extension if needed
+                const imagePath = RNFetchBlob.fs.dirs.DownloadDir + '/image' + timestamp + '.jpg'; // Change the file name and extension if needed
                 RNFetchBlob.fs.writeFile(imagePath, base64Data, 'base64');
                 console.log(imagePath)
                 Alert.alert('Image Downloaded Successfully');
+                navigattion.navigate('dashboard', { user_id: user_id })
             } else {
                 Alert.alert('Storage Permission Denied');
             }
@@ -120,10 +123,11 @@ export default function App(props) {
                 />
             )}
             <View style={{
-                 alignItems: 'center', 
-                margintop: 80, }}>
+                alignItems: 'center',
+                margintop: 80,
+            }}>
                 <TouchableOpacity onPress={() => handleDownload()} style={styles.button}>
-                    <Text style={{ color: '#fff',fontWeight:'bold'}}>Download</Text>
+                    <Text style={{ color: '#fff', fontWeight: 'bold' }}>Download</Text>
                 </TouchableOpacity>
             </View>
         </View>

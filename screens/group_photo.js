@@ -4,7 +4,7 @@ import {
     launchCamera,
     launchImageLibrary
 } from 'react-native-image-picker';
-
+import url from '../api_url';
 import { useNavigation } from '@react-navigation/native';
 
 export default function App(props) {
@@ -18,10 +18,39 @@ export default function App(props) {
         console.log("---------", user_id)
     }, [])
 
-    const chooseFile = (type) => {
+    function addAsset() {
+
+        const formData = new FormData();
+        formData.append('user_id', user_id);
+        formData.append('image', {
+            uri: individualImage.uri,
+            name: individualImage.name,
+            type: individualImage.type,
+        });
+
+        const response = fetch(url + 'AddAsset', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        })
+
+        if (!response.ok) {
+            console.log("couldnot add to asset")
+        }
+
+        else {
+            console.log("asset added")
+        }
+        return response
+    }
+
+    const chooseFile = (photo,type) => {
         let options = {
-            mediaType: type,
+            mediaType: photo,
             quality: 1,
+            includeBase64: true
         };
 
         launchImageLibrary(options, (response) => {
@@ -63,6 +92,9 @@ export default function App(props) {
 
 
     const handleExtractButtonClick = () => {
+        if (user_id && user_id != 0) {
+            addAsset()
+        }
         // Navigate to the next screen and pass the 'image' state as a parameter
         navigation.navigate('add_to_group_test', { selectedGroup: groupImage, selectedIndividual: individualImage, user_id: user_id });
     };
@@ -81,7 +113,7 @@ export default function App(props) {
 
 
                 <View style={{ flexDirection: 'row' }}>
-                    <Pressable onPress={() => { chooseFile('individual') }} style={style.box}>
+                    <Pressable onPress={() => { chooseFile('photo','individual') }} style={style.box}>
                         <Image
                             source={require('../assets/upload.png')}
                             style={style.image}
@@ -89,7 +121,7 @@ export default function App(props) {
                         <Text style={style.label}>INDIVIDUAL</Text>
                     </Pressable>
 
-                    <Pressable onPress={() => { chooseFile('group') }} style={[style.box, {}]}>
+                    <Pressable onPress={() => { chooseFile('photo','group') }} style={[style.box, {}]}>
 
                         <Image
                             source={require('../assets/upload.png')}
@@ -100,16 +132,16 @@ export default function App(props) {
                     </Pressable>
                 </View>
                 {groupImage && individualImage &&
-                    <View style={{ flex: 1, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginTop: 80, marginLeft: 20 }}>
+                    <View style={{ flex: 1, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginTop: 80, marginLeft: 30 }}>
 
-                        <Pressable onPress={handleExtractButtonClick} style={{ backgroundColor: '#FFF', padding: 15, margin: 20, marginHorizontal: 300, borderRadius: 150, marginRight: 10, marginTop: 120}} >
+                        <Pressable onPress={handleExtractButtonClick} style={{ backgroundColor: '#FFF', padding: 15, margin: 20, marginHorizontal: 300, borderRadius: 150, marginRight: 10, marginTop: 77 }} >
                             <Image source={require('../assets/right.png')} style={{ height: 30, width: 30 }}></Image>
                         </Pressable>
                     </View>
                 }
                 {groupImage && individualImage &&
 
-                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginTop: 80, }}>
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginTop: 60, }}>
 
                         <View style={style.SelectBox}>
 
@@ -136,7 +168,7 @@ export default function App(props) {
 const style = StyleSheet.create({
     container: {
         paddingHorizontal: 5,
-        paddingVertical: 20,
+        paddingVertical: 1,
     },
     background: {
         height: 900,
@@ -175,7 +207,7 @@ const style = StyleSheet.create({
         backgroundColor: '#FCFCFC',
         borderRadius: 15,
         marginHorizontal: 10,
-        marginVertical: 20,
+        margintop: 20,
         elevation: 3,
         width: 110,
         height: 110,
@@ -185,7 +217,7 @@ const style = StyleSheet.create({
     box: {
         backgroundColor: '#FCFCFC',
         borderRadius: 15,
-        marginTop: 30,
+        marginTop: 20,
         marginLeft: 25,
         elevation: 3,
         width: '40%',

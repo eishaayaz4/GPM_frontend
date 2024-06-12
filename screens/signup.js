@@ -129,12 +129,12 @@ const style = StyleSheet.create({
     container: {
 
         paddingHorizontal: 20,
-        paddingVertical: 15,
+        paddingVertical: 1,
         backgroundColor: "transparent"
 
     },
     textContainer: {
-        marginBottom: 30,
+        marginBottom: 20,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
